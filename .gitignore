@@ -1,0 +1,5 @@
+gin-bin
+.vscode/
+*.test
+*.out
+*.coverprofile
