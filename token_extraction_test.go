@@ -6,7 +6,9 @@ import (
 	"testing"
 )
 
-var tokenRaw = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+var tokenRaw = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdWJqZWN0IiwiaXNzIjoiaXNzdWVyIiwiYXVkIjoiYXVkaWVuY2UifQ.XjWtlyDjBoFDREk1WbvxriSdLve5jI7uyamzCiGdg9U"
+var audience = "audience"
+var issuer = "issuer"
 
 func TestFromRequestExtraction(t *testing.T) {
 
@@ -14,11 +16,23 @@ func TestFromRequestExtraction(t *testing.T) {
 	headerValue := fmt.Sprintf("Bearer %s", tokenRaw)
 	headerTokenRequest.Header.Add("Authorization", headerValue)
 
-	_, err := FromRequest(headerTokenRequest)
+	token, err := FromRequest(headerTokenRequest)
 
 	if err != nil {
 		t.Error(err)
-		t.FailNow()
+		return
+	}
+
+	tokenAudience, hasAudience := token.Claims().Audience()
+	tokenIssuer, hasIssuer := token.Claims().Issuer()
+
+	if !hasAudience || !hasIssuer {
+		t.Error("Missing audience, issuer or subject")
+		return
+	}
+
+	if tokenIssuer != issuer || tokenAudience[0] != audience {
+		t.Error("Invalid issuer, audience or subject:", tokenIssuer, tokenAudience[0])
 	}
 
 }

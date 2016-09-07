@@ -21,8 +21,8 @@ type Configuration struct {
 }
 
 // NewConfiguration creates a configuration for server
-func NewConfiguration(secret []byte, audience, issuer string, method crypto.SigningMethod) *Configuration {
-	return &Configuration{
+func NewConfiguration(secret []byte, audience, issuer string, method crypto.SigningMethod) Configuration {
+	return Configuration{
 		secret:   secret,
 		Audience: audience,
 		Issuer:   issuer,
@@ -48,6 +48,7 @@ func NewValidator(config Configuration) *JWTValidator {
 	expectedClaims := jws.Claims{}
 	expectedClaims.SetIssuer(config.Issuer)
 	expectedClaims.SetAudience(config.Audience)
+
 	validator := jws.NewValidator(expectedClaims, config.exp, config.nbf, nil)
 
 	return &JWTValidator{config, validator, RequestTokenExtractorFunc(FromRequest)}
@@ -59,13 +60,14 @@ func (v *JWTValidator) validateToken(token jwt.JWT) error {
 
 // ValidateRequest validates the token within
 // the http request.
-func (v *JWTValidator) ValidateRequest(r *http.Request) error {
+func (v *JWTValidator) ValidateRequest(r *http.Request) (jwt.JWT, error) {
 
 	token, err := v.extractor.Extract(r)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return v.validateToken(token)
+	err = v.validateToken(token)
+	return token, err
 }
