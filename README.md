@@ -17,16 +17,18 @@ go get github.com/yageek/auth0
 ## Usage
 
 ```go
-    //Creates a configuration with the Auth0 information
-    secret, _ := base64.URLEncoding.DecodeString(os.Getenv("AUTH0_CLIENT_SECRET"))
-    audience := os.Getenv("AUTH0_CLIENT_ID")
+//Creates a configuration with the Auth0 information
 
-    configuration := NewConfiguration(secret, audience, "https://mydomain.eu.auth0.com/", crypto.SigningMethodHS256)
-	validator := NewValidator(configuration)
+secret, _ := base64.URLEncoding.DecodeString(os.Getenv("AUTH0_CLIENT_SECRET"))
+audience := os.Getenv("AUTH0_CLIENT_ID")
+issuer := "https://mydomain.eu.auth0.com/"
 
-    token, err := validator.ValidateRequest(r)
-    
-    if err != nil {
-        fmt.Println("Token is not valid:", token)
-    }
+configuration := NewConfiguration(secret, audience, issuer, crypto.SigningMethodHS256)
+validator := NewValidator(configuration)
+
+token, err := validator.ValidateRequest(r)
+
+if err != nil {
+    fmt.Println("Token is not valid:", token)
+}
 ```
