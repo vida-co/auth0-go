@@ -55,7 +55,7 @@ func RestrictToScope(handler gin.HandlerFunc, wantedGroups []string) gin.Handler
 
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
-			log.Println("Invalid tokem:", err)
+			log.Println("Invalid token:", err)
 			return
 		}
 
