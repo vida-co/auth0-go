@@ -6,7 +6,7 @@
 
 # auth0
 
-auth0 is a package helping to authenticate against [auth0](https://auth0.com) services.
+auth0 is a package helping to authenticate using the [Auth0](https://auth0.com) service.
 
 ## Installation 
 
@@ -31,4 +31,47 @@ token, err := validator.ValidateRequest(r)
 if err != nil {
     fmt.Println("Token is not valid:", token)
 }
+```
+
+## Example
+
+### Gin
+
+Using [Gin](https://github.com/gin-gonic/gin) and the [Auth0 Authorization Extension](https://auth0.com/docs/extensions/authorization-extension), you 
+may want to implement the authentication auth like the following:
+
+```go
+// Access Control Helper function.
+func shouldAccess(wantedGroups []string, groups []interface{}) bool { 
+ /* Fill depending on your needs */
+}
+
+// Wrapping a Gin endpoint.
+func RestrictToScope(handler gin.HandlerFunc, wantedGroups []string) gin.HandlerFunc {
+
+	return gin.HandlerFunc(func(c *gin.Context) {
+
+		jwt, err := validator.ValidateRequest(c.Request)
+
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			log.Println("Invalid tokem:", err)
+			return
+		}
+
+		metadata, okMetadata := jwt.Claims().Get("app_metadata").(map[string]interface{})
+		authorization, okAuthorization := metadata["authorization"].(map[string]interface{})
+		groups, hasGroups := authorization["groups"].([]interface{})
+
+		if !okMetadata || !okAuthorization || !hasGroups || !shouldAccess(wantedGroups, groups) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "need more privileges"})
+			return
+		}
+
+		handler(c)
+	})
+}
+
+// Use it
+r.PUT("/news", auth.RestrictToScope(MyProtectedEndpoints, []string{auth.AdminGroup}))
 ```
