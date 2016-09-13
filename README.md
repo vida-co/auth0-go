@@ -73,5 +73,5 @@ func RestrictToScope(handler gin.HandlerFunc, wantedGroups []string) gin.Handler
 }
 
 // Use it
-r.PUT("/news", auth.RestrictToScope(MyProtectedEndpoints, []string{auth.AdminGroup}))
+r.PUT("/news", auth.RestrictToScope(MyProtectedEndpoint, []string{auth.AdminGroup}))
 ```
