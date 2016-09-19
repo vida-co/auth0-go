@@ -41,21 +41,23 @@ Using [Gin](https://github.com/gin-gonic/gin) and the [Auth0 Authorization Exten
 may want to implement the authentication auth like the following:
 
 ```go
+var auth.AdminGroup string = "my_admin_group"
+
 // Access Control Helper function.
 func shouldAccess(wantedGroups []string, groups []interface{}) bool { 
  /* Fill depending on your needs */
 }
 
-// Wrapping a Gin endpoint.
-func RestrictToScope(handler gin.HandlerFunc, wantedGroups []string) gin.HandlerFunc {
+// Wrapping a Gin endpoint with Auth0 Groups.
+func Auth0Groups(wantedGroups ...string) gin.HandlerFunc {
 
 	return gin.HandlerFunc(func(c *gin.Context) {
-
 		jwt, err := validator.ValidateRequest(c.Request)
 
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
-			log.Println("Invalid token:", err)
+			c.Abort()
+			log.Println("InvalidToken:", jwt)
 			return
 		}
 
@@ -65,13 +67,13 @@ func RestrictToScope(handler gin.HandlerFunc, wantedGroups []string) gin.Handler
 
 		if !okMetadata || !okAuthorization || !hasGroups || !shouldAccess(wantedGroups, groups) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "need more privileges"})
+			c.Abort()
 			return
 		}
-
-		handler(c)
+		c.Next()
 	})
 }
 
 // Use it
-r.PUT("/news", auth.RestrictToScope(MyProtectedEndpoint, []string{auth.AdminGroup}))
+r.PUT("/news", auth.Auth0Groups(auth.AdminGroup), api.UpdateNewsWithID)
 ```
