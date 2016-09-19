@@ -75,5 +75,5 @@ func Auth0Groups(wantedGroups ...string) gin.HandlerFunc {
 }
 
 // Use it
-r.PUT("/news", auth.Auth0Groups(auth.AdminGroup), api.UpdateNewsWithID)
+r.PUT("/news", auth.Auth0Groups(auth.AdminGroup), api.GetNews)
 ```
