@@ -46,8 +46,14 @@ func NewValidator(config Configuration) *JWTValidator {
 
 	// Set expected claims
 	expectedClaims := jws.Claims{}
-	expectedClaims.SetIssuer(config.Issuer)
-	expectedClaims.SetAudience(config.Audience)
+
+	if config.Issuer != "" {
+		expectedClaims.SetIssuer(config.Issuer)
+	}
+
+	if config.Audience != "" {
+		expectedClaims.SetAudience(config.Audience)
+	}
 
 	validator := jws.NewValidator(expectedClaims, config.exp, config.nbf, nil)
 
