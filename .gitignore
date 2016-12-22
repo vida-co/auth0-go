@@ -3,3 +3,5 @@ gin-bin
 *.test
 *.out
 *.coverprofile
+.idea/
+*.iml
