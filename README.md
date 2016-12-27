@@ -14,17 +14,18 @@ auth0 is a package helping to authenticate using the [Auth0](https://auth0.com) 
 go get github.com/yageek/auth0
 ```
 
-## Usage
+## Client Credentials
 
 ```go
 //Creates a configuration with the Auth0 information
-
 secret, _ := base64.URLEncoding.DecodeString(os.Getenv("AUTH0_CLIENT_SECRET"))
+secretProvider := auth0.NewKeyProvider([]byte("secret"))
 audience := os.Getenv("AUTH0_CLIENT_ID")
-issuer := "https://mydomain.eu.auth0.com/"
 
-configuration := NewConfiguration(secret, audience, issuer, crypto.SigningMethodHS256)
-validator := NewValidator(configuration)
+configuration := auth0.NewConfiguration(secretProvider, audience, "https://mydomain.eu.auth0.com/", jose.RS256)
+validator := auth0.NewValidator(configuration)
+
+
 
 token, err := validator.ValidateRequest(r)
 
@@ -33,6 +34,21 @@ if err != nil {
 }
 ```
 
+## API with JWK
+
+```go
+   
+client := NewJWKClient(JWKClientOptions{URI: "https://mydomain.eu.auth0.com/.well-known/jwks.json"})
+audience := os.Getenv("AUTH0_CLIENT_ID")
+configuration := NewConfiguration(client, audience, "https://mydomain.eu.auth0.com/", jose.RS256)
+validator := NewValidator(configuration)
+
+token, err := validator.ValidateRequest(r)
+
+if err != nil {
+    fmt.Println("Token is not valid:", token)
+}
+```
 ## Example
 
 ### Gin
