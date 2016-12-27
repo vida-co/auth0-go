@@ -14,7 +14,7 @@ auth0 is a package helping to authenticate against [auth0](https://auth0.com) se
 go get github.com/yageek/auth0
 ```
 
-## Usage
+## Client Credentials
 
 ```go
     //Creates a configuration with the Auth0 information
@@ -22,9 +22,25 @@ go get github.com/yageek/auth0
     secretProvider := auth0.NewKeyProvider([]byte("secret"))
     audience := os.Getenv("AUTH0_CLIENT_ID")
 
-    configuration := auth0.NewConfiguration(secretProvider, audience, "https://mydomain.eu.auth0.com/", crypto.SigningMethodHS256)
+    configuration := auth0.NewConfiguration(secretProvider, audience, "https://mydomain.eu.auth0.com/", jose.RS256)
 	validator := auth0.NewValidator(configuration)
 
+    token, err := validator.ValidateRequest(r)
+    
+    if err != nil {
+        fmt.Println("Token is not valid:", token)
+    }
+```
+
+## API JWK
+
+```go
+   
+    client := NewJWKClient(JWKClientOptions{URI: "https://mydomain.eu.auth0.com/.well-known/jwks.json"})
+    audience := os.Getenv("AUTH0_CLIENT_ID")
+    configuration := NewConfiguration(client, audience, "https://mydomain.eu.auth0.com/", jose.RS256)
+    validator := NewValidator(configuration)
+    
     token, err := validator.ValidateRequest(r)
     
     if err != nil {
