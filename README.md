@@ -19,10 +19,11 @@ go get github.com/yageek/auth0
 ```go
     //Creates a configuration with the Auth0 information
     secret, _ := base64.URLEncoding.DecodeString(os.Getenv("AUTH0_CLIENT_SECRET"))
+    secretProvider := auth0.NewKeyProvider([]byte("secret"))
     audience := os.Getenv("AUTH0_CLIENT_ID")
 
-    configuration := NewConfiguration(secret, audience, "https://mydomain.eu.auth0.com/", crypto.SigningMethodHS256)
-	validator := NewValidator(configuration)
+    configuration := auth0.NewConfiguration(secretProvider, audience, "https://mydomain.eu.auth0.com/", crypto.SigningMethodHS256)
+	validator := auth0.NewValidator(configuration)
 
     token, err := validator.ValidateRequest(r)
     
