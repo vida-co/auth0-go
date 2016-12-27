@@ -7,9 +7,12 @@ import (
 	"testing"
 )
 
+
+var secretProvider = NewKeyProvider([]byte("secret"))
+
 func TestValidatorFull(t *testing.T) {
 
-	configuration := NewConfiguration([]byte("secret"), "audience", "issuer", jose.HS256)
+	configuration := NewConfiguration(secretProvider, "audience", "issuer", jose.HS256)
 	validator := NewValidator(configuration)
 	headerTokenRequest, _ := http.NewRequest("", "http://localhost", nil)
 	headerValue := fmt.Sprintf("Bearer %s", tokenRaw)
@@ -36,7 +39,7 @@ func TestValidatorFull(t *testing.T) {
 }
 func TestValidatorEmpty(t *testing.T) {
 
-	configuration := NewConfiguration([]byte("secret"), "", "", jose.HS256)
+	configuration := NewConfiguration(secretProvider, "", "", jose.HS256)
 	validator := NewValidator(configuration)
 	headerTokenRequest, _ := http.NewRequest("", "http://localhost", nil)
 	validToken := `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ`
@@ -64,7 +67,7 @@ func TestValidatorEmpty(t *testing.T) {
 
 func TestValidatorPartial(t *testing.T) {
 
-	configuration := NewConfiguration([]byte("secret"), "required", "", jose.HS256)
+	configuration := NewConfiguration(secretProvider, "required", "", jose.HS256)
 	validator := NewValidator(configuration)
 	headerTokenRequest, _ := http.NewRequest("", "http://localhost", nil)
 	validToken := `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ`

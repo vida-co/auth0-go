@@ -7,11 +7,26 @@ import (
 	"gopkg.in/square/go-jose.v2"
 )
 
+type SecretProvider interface {
+	GetSecret(req *http.Request) (interface{}, error)
+}
+
+type SecretProviderFunc func (req *http.Request) (interface{}, error)
+
+func (f SecretProviderFunc) GetSecret(req *http.Request) (interface{}, error) {
+	return f(req)
+}
+
+func NewKeyProvider(key interface{}) SecretProvider {
+	return SecretProviderFunc(func(req *http.Request) (interface{},error) {
+		return key, nil
+	})
+}
 // Configuration contains
 // all the informations about the
 // Auth0 service.
 type Configuration struct {
-	key   []byte
+	secretProvider   SecretProvider
 	expectedClaims jwt.Expected
 	signIn   jose.SignatureAlgorithm
 	exp      time.Duration // EXPLeeway
@@ -19,14 +34,14 @@ type Configuration struct {
 }
 
 // NewConfiguration creates a configuration for server
-func NewConfiguration(key []byte, audience, issuer string, method jose.SignatureAlgorithm) Configuration {
+func NewConfiguration(provider SecretProvider, audience, issuer string, method jose.SignatureAlgorithm) Configuration {
 	var aud []string
 	if audience != "" {
 		aud = []string{audience}
 	}
 
 	return Configuration{
-		key:   key,
+		secretProvider:   provider,
 		expectedClaims: jwt.Expected{Issuer: issuer, Audience: aud},
 		signIn:   method,
 		exp:      0,
@@ -59,7 +74,12 @@ func (v *JWTValidator) ValidateRequest(r *http.Request) (*jwt.JSONWebToken, erro
 	}
 
 	claims := jwt.Claims{}
-	err = token.Claims(v.config.key, &claims)
+	key, err := v.config.secretProvider.GetSecret(r)
+	if err != nil {
+		return nil, err
+	}
+
+	err = token.Claims(key, &claims)
 
 	if err != nil {
 		return nil, err
