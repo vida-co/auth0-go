@@ -6,8 +6,6 @@ import (
 	"net/url"
 	"net/http"
 	"encoding/json"
-	"golang.org/x/mobile/event/key"
-	"sync"
 )
 
 
@@ -25,17 +23,18 @@ func(j *JWKProvider) GetConfiguration() (auth0.Configuration, error) {
 	}
 	defer resp.Body.Close()
 
-	var key jose.JSONWebKey{}
+	var key = jose.JSONWebKey{}
 	err = json.NewDecoder(resp.Body).Decode(&key)
 
 	if err != nil {
 		return auth0.Configuration{}, err
 	}
+	return auth0.Configuration{}, err
 }
-
+/*
 // NewAuth0GroupsForClient returns a new Auth0 authenticator
-func NewAuth0(secret []byte, audience, issuer string, method jose.SignatureAlgorithm) *Auth0 {
-	configuration := auth0.NewConfiguration(secret, audience, issuer, method)
+func NewAuth0(provider auth0.SecretProvider, audience, issuer string, method jose.SignatureAlgorithm) *Auth0 {
+	configuration := auth0.NewConfiguration(provider, audience, issuer, method)
 	return &auth0.NewValidator(configuration)
 }
 
@@ -73,3 +72,4 @@ func shouldAccess(wantedGroups []string, groups []interface{}) bool {
 	}
 	return true
 }
+*/
