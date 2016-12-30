@@ -76,7 +76,16 @@ func Auth0Groups(wantedGroups ...string) gin.HandlerFunc {
 			log.Println("InvalidToken:", jwt)
 			return
 		}
-
+        
+        claims := map[string]interface{}{}
+        err = validator.Claims(c.Request, tok, &claims)
+        
+        if err != nil {
+        			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid claims"})
+        			c.Abort()
+        			return
+        		}
+        		
 		metadata, okMetadata := jwt.Claims().Get("app_metadata").(map[string]interface{})
 		authorization, okAuthorization := metadata["authorization"].(map[string]interface{})
 		groups, hasGroups := authorization["groups"].([]interface{})

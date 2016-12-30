@@ -2,11 +2,9 @@ package auth0
 
 import (
 	"fmt"
-	"gopkg.in/square/go-jose.v2/jwt"
 	"gopkg.in/square/go-jose.v2"
 	"net/http"
 	"testing"
-	"encoding/base64"
 )
 
 
