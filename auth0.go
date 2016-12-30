@@ -1,36 +1,37 @@
 package auth0
 
 import (
-	"time"
+	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 	"net/http"
-	"gopkg.in/square/go-jose.v2"
+	"time"
 )
 
 type SecretProvider interface {
 	GetSecret(req *http.Request) (interface{}, error)
 }
 
-type SecretProviderFunc func (req *http.Request) (interface{}, error)
+type SecretProviderFunc func(req *http.Request) (interface{}, error)
 
 func (f SecretProviderFunc) GetSecret(req *http.Request) (interface{}, error) {
 	return f(req)
 }
 
 func NewKeyProvider(key interface{}) SecretProvider {
-	return SecretProviderFunc(func(req *http.Request) (interface{},error) {
+	return SecretProviderFunc(func(req *http.Request) (interface{}, error) {
 		return key, nil
 	})
 }
+
 // Configuration contains
 // all the informations about the
 // Auth0 service.
 type Configuration struct {
-	secretProvider   SecretProvider
+	secretProvider SecretProvider
 	expectedClaims jwt.Expected
-	signIn   jose.SignatureAlgorithm
-	exp      time.Duration // EXPLeeway
-	nbf      time.Duration // NBFLeeway
+	signIn         jose.SignatureAlgorithm
+	exp            time.Duration // EXPLeeway
+	nbf            time.Duration // NBFLeeway
 }
 
 // NewConfiguration creates a configuration for server
@@ -41,11 +42,11 @@ func NewConfiguration(provider SecretProvider, audience, issuer string, method j
 	}
 
 	return Configuration{
-		secretProvider:   provider,
+		secretProvider: provider,
 		expectedClaims: jwt.Expected{Issuer: issuer, Audience: aud},
-		signIn:   method,
-		exp:      0,
-		nbf:      0,
+		signIn:         method,
+		exp:            0,
+		nbf:            0,
 	}
 }
 
@@ -54,7 +55,6 @@ func NewConfiguration(provider SecretProvider, audience, issuer string, method j
 type JWTValidator struct {
 	config    Configuration
 	extractor RequestTokenExtractor
-
 }
 
 // NewValidator creates a new
@@ -87,4 +87,13 @@ func (v *JWTValidator) ValidateRequest(r *http.Request) (*jwt.JSONWebToken, erro
 
 	err = claims.Validate(v.config.expectedClaims)
 	return token, err
+}
+
+// Claims unmarshall the claims of the provided token
+func (v *JWTValidator) Claims(req *http.Request, token *jwt.JSONWebToken, values interface{}) error {
+	key, err := v.config.secretProvider.GetSecret(req)
+	if err != nil {
+		return err
+	}
+	return token.Claims(key, values)
 }
