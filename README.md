@@ -14,15 +14,16 @@ auth0 is a package helping to authenticate using the [Auth0](https://auth0.com) 
 go get github.com/yageek/auth0
 ```
 
-## Client Credentials
-
+## Client Credentials - HS256
+Using HS256, the validation key is the secret you retrieve in the dashboard.
 ```go
-//Creates a configuration with the Auth0 information
+// Creates a configuration with the Auth0 information
+// If you're secret is not base64 encoded, provide your key as a string
 secret, _ := base64.URLEncoding.DecodeString(os.Getenv("AUTH0_CLIENT_SECRET"))
-secretProvider := auth0.NewKeyProvider([]byte("secret"))
+secretProvider := auth0.NewKeyProvider(secret)
 audience := os.Getenv("AUTH0_CLIENT_ID")
 
-configuration := auth0.NewConfiguration(secretProvider, audience, "https://mydomain.eu.auth0.com/", jose.RS256)
+configuration := auth0.NewConfiguration(secretProvider, audience, "https://mydomain.eu.auth0.com/", jose.HS256)
 validator := auth0.NewValidator(configuration)
 
 
@@ -34,6 +35,48 @@ if err != nil {
 }
 ```
 
+## Client Credentials - RS256
+Using RS256, the validation key is the certificate you find in advanced settings
+
+```go
+// Extracted from https://github.com/square/go-jose/blob/master/utils.go
+// LoadPublicKey loads a public key from PEM/DER-encoded data.
+func LoadPublicKey(data []byte) (interface{}, error) {
+	input := data
+
+	block, _ := pem.Decode(data)
+	if block != nil {
+		input = block.Bytes
+	}
+
+	// Try to load SubjectPublicKeyInfo
+	pub, err0 := x509.ParsePKIXPublicKey(input)
+	if err0 == nil {
+		return pub, nil
+	}
+
+	cert, err1 := x509.ParseCertificate(input)
+	if err1 == nil {
+		return cert.PublicKey, nil
+	}
+
+	return nil, fmt.Errorf("square/go-jose: parse error, got '%s' and '%s'", err0, err1)
+}
+// Create a configuration with the Auth0 information
+// If you're secret is not base64 encoded, provide your key as a string
+secret, _ := LoadPublicKey(sharedKey)
+secretProvider := auth0.NewKeyProvider(secret)
+audience := os.Getenv("AUTH0_CLIENT_ID")
+
+configuration := auth0.NewConfiguration(secretProvider, audience, "https://mydomain.eu.auth0.com/", jose.RS256)
+validator := auth0.NewValidator(configuration)
+
+token, err := validator.ValidateRequest(r)
+
+if err != nil {
+    fmt.Println("Token is not valid:", token)
+}
+```
 ## API with JWK
 
 ```go
