@@ -1,14 +1,12 @@
 package middlewares
 
 import (
-	"github.com/yageek/auth0"
-	"gopkg.in/square/go-jose.v2"
-	"net/url"
-	"net/http"
 	"encoding/json"
+	"github.com/auth0-community/auth0"
+	"gopkg.in/square/go-jose.v2"
+	"net/http"
+	"net/url"
 )
-
-
 
 type Auth0 auth0.JWTValidator
 
@@ -16,7 +14,7 @@ type JWKProvider struct {
 	URL url.URL
 }
 
-func(j *JWKProvider) GetConfiguration() (auth0.Configuration, error) {
+func (j *JWKProvider) GetConfiguration() (auth0.Configuration, error) {
 	resp, err := http.DefaultClient.Get(j.URL.String())
 	if err != nil {
 		return auth0.Configuration{}, err
@@ -31,6 +29,7 @@ func(j *JWKProvider) GetConfiguration() (auth0.Configuration, error) {
 	}
 	return auth0.Configuration{}, err
 }
+
 /*
 // NewAuth0GroupsForClient returns a new Auth0 authenticator
 func NewAuth0(provider auth0.SecretProvider, audience, issuer string, method jose.SignatureAlgorithm) *Auth0 {

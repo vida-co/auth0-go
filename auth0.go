@@ -7,16 +7,22 @@ import (
 	"time"
 )
 
+// SecretProvider will provide everything
+// needed retrieve the secret.
 type SecretProvider interface {
 	GetSecret(req *http.Request) (interface{}, error)
 }
 
+// SecretProviderFunc simple wrappers to provide
+// secret with functions.
 type SecretProviderFunc func(req *http.Request) (interface{}, error)
 
+// GetSecret implements the SecretProvider interface.
 func (f SecretProviderFunc) GetSecret(req *http.Request) (interface{}, error) {
 	return f(req)
 }
 
+// NewKeyProvider provide a simple passphrase key provider.
 func NewKeyProvider(key interface{}) SecretProvider {
 	return SecretProviderFunc(func(req *http.Request) (interface{}, error) {
 		return key, nil
@@ -24,7 +30,7 @@ func NewKeyProvider(key interface{}) SecretProvider {
 }
 
 // Configuration contains
-// all the informations about the
+// all the information about the
 // Auth0 service.
 type Configuration struct {
 	secretProvider SecretProvider
