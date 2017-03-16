@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/auth0-community/auth0.svg?branch=master)](https://travis-ci.org/auth0-community/auth0)
+[![Coverage Status](https://coveralls.io/repos/github/auth0-community/auth0/badge.svg?branch=master)](https://coveralls.io/github/auth0-community/auth0?branch=master)
 [![GoDoc](https://godoc.org/github.com/auth0-community/auth0?status.png)](https://godoc.org/github.com/auth0-community/auth0)
 [![Report Cart](http://goreportcard.com/badge/auth0-community/auth0)](http://goreportcard.com/report/auth0-community/auth0)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
@@ -9,7 +11,7 @@ auth0 is a package helping to authenticate using the [Auth0](https://auth0.com) 
 ## Installation 
 
 ```
-go get github.com/yageek/auth0
+go get github.com/auth0-community/auth0
 ```
 
 ## Client Credentials - HS256
