@@ -2,10 +2,12 @@ package middlewares
 
 import (
 	"encoding/json"
-	"github.com/auth0-community/auth0"
-	"gopkg.in/square/go-jose.v2"
 	"net/http"
 	"net/url"
+
+	"github.com/yageek/auth0"
+
+	"gopkg.in/square/go-jose.v2"
 )
 
 type Auth0 auth0.JWTValidator
