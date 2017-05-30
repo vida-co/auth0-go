@@ -37,8 +37,6 @@ type Configuration struct {
 	secretProvider SecretProvider
 	expectedClaims jwt.Expected
 	signIn         jose.SignatureAlgorithm
-	exp            time.Duration // EXPLeeway
-	nbf            time.Duration // NBFLeeway
 }
 
 // NewConfiguration creates a configuration for server
@@ -47,8 +45,6 @@ func NewConfiguration(provider SecretProvider, audience []string, issuer string,
 		secretProvider: provider,
 		expectedClaims: jwt.Expected{Issuer: issuer, Audience: audience},
 		signIn:         method,
-		exp:            0,
-		nbf:            0,
 	}
 }
 
@@ -87,7 +83,8 @@ func (v *JWTValidator) ValidateRequest(r *http.Request) (*jwt.JSONWebToken, erro
 		return nil, err
 	}
 
-	err = claims.Validate(v.config.expectedClaims)
+	expected := v.config.expectedClaims.WithTime(time.Now())
+	err = claims.Validate(expected)
 	return token, err
 }
 
