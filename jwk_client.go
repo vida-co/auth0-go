@@ -7,11 +7,10 @@ import (
 	"sync"
 
 	"github.com/go-errors/errors"
-	"github.com/square/go-jose"
+	"gopkg.in/square/go-jose.v2"
 )
 
 var (
-	DefaultOptions        = JWKClientOptions{""}
 	ErrInvalidContentType = errors.New("Should have a JSON content type for JWKS endpoint.")
 	ErrNoKeyFound         = errors.New("No Keys has been found")
 	ErrInvalidTokenHeader = errors.New("No valid header found")
@@ -23,20 +22,20 @@ type JWKClientOptions struct {
 }
 
 type JWKS struct {
-	Keys []jose.JsonWebKey `json:"keys"`
+	Keys []jose.JSONWebKey `json:"keys"`
 }
 
 type JWKClient struct {
-	keys    map[string]jose.JsonWebKey
+	keys    map[string]jose.JSONWebKey
 	mu      sync.Mutex
 	options JWKClientOptions
 }
 
 func NewJWKClient(options JWKClientOptions) *JWKClient {
-	return &JWKClient{keys: map[string]jose.JsonWebKey{}, options: options}
+	return &JWKClient{keys: map[string]jose.JSONWebKey{}, options: options}
 }
 
-func (j *JWKClient) GetKey(ID string) (jose.JsonWebKey, bool) {
+func (j *JWKClient) GetKey(ID string) (jose.JSONWebKey, bool) {
 	j.mu.Lock()
 	defer j.mu.Unlock()
 
