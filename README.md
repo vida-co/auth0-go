@@ -18,7 +18,6 @@ go get github.com/auth0-community/go-auth0
 Using HS256, the validation key is the secret you retrieve in the dashboard.
 ```go
 // Creates a configuration with the Auth0 information
-// If you're secret is not base64 encoded, provide your key as a string
 secret, _ := base64.URLEncoding.DecodeString(os.Getenv("AUTH0_CLIENT_SECRET"))
 secretProvider := auth0.NewKeyProvider(secret)
 audience := os.Getenv("AUTH0_CLIENT_ID")
@@ -61,7 +60,6 @@ func LoadPublicKey(data []byte) (interface{}, error) {
 	return nil, fmt.Errorf("square/go-jose: parse error, got '%s' and '%s'", err0, err1)
 }
 // Create a configuration with the Auth0 information
-// If you're secret is not base64 encoded, provide your key as a string
 secret, _ := LoadPublicKey(sharedKey)
 secretProvider := auth0.NewKeyProvider(secret)
 audience := os.Getenv("AUTH0_CLIENT_ID")
