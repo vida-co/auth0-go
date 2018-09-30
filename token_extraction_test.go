@@ -59,6 +59,30 @@ func TestFromRequestParamsExtraction(t *testing.T) {
 	}
 }
 
+func TestFromCookieExtraction(t *testing.T) {
+	referenceToken := getTestToken(defaultAudience, defaultIssuer, time.Now(), jose.HS256, defaultSecret)
+
+	r, _ := http.NewRequest("", "http://localhost", nil)
+	r.AddCookie(&http.Cookie{Name: "access_token", Value: referenceToken})
+
+	token, err := FromCookie(r)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	claims := jwt.Claims{}
+	err = token.Claims([]byte("secret"), &claims)
+	if err != nil {
+		t.Errorf("Claims should be decoded correctly with default token: %q \n", err)
+		t.FailNow()
+	}
+
+	if claims.Issuer != defaultIssuer || !reflect.DeepEqual(claims.Audience, jwt.Audience(defaultAudience)) {
+		t.Error("Invalid issuer, audience or subject:", claims.Issuer, claims.Audience)
+	}
+}
+
 func TestFromMultipleExtraction(t *testing.T) {
 	extractor := FromMultiple(RequestTokenExtractorFunc(FromHeader), RequestTokenExtractorFunc(FromParams))
 
