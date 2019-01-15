@@ -199,7 +199,7 @@ Feel like PRs and issues are not enough? Want to dive into further discussion ab
 
 ## License
 
-This project is licensed under the MIT license. See the [LICENSE](https://github.com/auth0-community/auth0-react-scripts/blob/master/LICENSE) file for more info.
+This project is licensed under the MIT license. See the [LICENSE](https://github.com/auth0-community/go-auth0/blob/master/LICENSE) file for more info.
 
 ## What is Auth0?
 
