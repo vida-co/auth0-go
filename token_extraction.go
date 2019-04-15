@@ -12,6 +12,8 @@ var (
 	// ErrTokenNotFound is returned by the ValidateRequest if the token was not
 	// found in the request.
 	ErrTokenNotFound = errors.New("Token not found")
+	// ErrNilRequest is returned by the FromHeader if the request is nil
+	ErrNilRequest = errors.New("Request nil")
 )
 
 // RequestTokenExtractor can extract a JWT
@@ -50,6 +52,9 @@ func FromMultiple(extractors ...RequestTokenExtractor) RequestTokenExtractor {
 // if not present.
 // TODO: Implement parsing form data.
 func FromHeader(r *http.Request) (*jwt.JSONWebToken, error) {
+	if r == nil {
+		return nil, ErrNilRequest
+	}
 	raw := ""
 	if h := r.Header.Get("Authorization"); len(h) > 7 && strings.EqualFold(h[0:7], "BEARER ") {
 		raw = h[7:]
@@ -62,6 +67,9 @@ func FromHeader(r *http.Request) (*jwt.JSONWebToken, error) {
 
 // FromParams returns the JWT when passed as the URL query param "token".
 func FromParams(r *http.Request) (*jwt.JSONWebToken, error) {
+	if r == nil {
+		return nil, ErrNilRequest
+	}
 	raw := r.URL.Query().Get("token")
 	if raw == "" {
 		return nil, ErrTokenNotFound
