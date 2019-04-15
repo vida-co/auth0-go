@@ -3,6 +3,7 @@ package auth0
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
@@ -99,5 +100,59 @@ func TestInvalidExtract(t *testing.T) {
 
 	if err == nil {
 		t.Error("A request without valid Authorization header should return an error.")
+	}
+}
+
+func TestFromHeader(t *testing.T) {
+	tReq := httptest.NewRequest("", "https://", nil)
+	referenceToken := getTestToken(defaultAudience, defaultIssuer, time.Now(), jose.HS256, defaultSecret)
+	headerValue := fmt.Sprintf("Bearer %s", referenceToken)
+	tReq.Header.Add("Authorization", headerValue)
+
+	type args struct {
+		r *http.Request
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"valid request", args{tReq}, false},
+		{"nil request", args{nil}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := FromHeader(tt.args.r)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FromHeader() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}
+
+func TestFromParams(t *testing.T) {
+	referenceToken := getTestToken(defaultAudience, defaultIssuer, time.Now(), jose.HS256, defaultSecret)
+	tReq := httptest.NewRequest("", "http://example.com?token="+referenceToken, nil)
+
+	type args struct {
+		r *http.Request
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"valid request", args{tReq}, false},
+		{"nil request", args{nil}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := FromParams(tt.args.r)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FromParams() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
 	}
 }
