@@ -60,8 +60,32 @@ func TestFromRequestParamsExtraction(t *testing.T) {
 	}
 }
 
+func TestFromCookieExtraction(t *testing.T) {
+	referenceToken := getTestToken(defaultAudience, defaultIssuer, time.Now(), jose.HS256, defaultSecret)
+
+	cookieTokenRequest, _ := http.NewRequest("", "http://localhost", nil)
+	cookieTokenRequest.AddCookie(&http.Cookie{Name: "access_token", Value: referenceToken})
+
+	token, err := FromCookie(cookieTokenRequest)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	claims := jwt.Claims{}
+	err = token.Claims([]byte("secret"), &claims)
+	if err != nil {
+		t.Errorf("Claims should be decoded correctly with default token: %q \n", err)
+		t.FailNow()
+	}
+
+	if claims.Issuer != defaultIssuer || !reflect.DeepEqual(claims.Audience, jwt.Audience(defaultAudience)) {
+		t.Error("Invalid issuer, audience or subject:", claims.Issuer, claims.Audience)
+	}
+}
+
 func TestFromMultipleExtraction(t *testing.T) {
-	extractor := FromMultiple(RequestTokenExtractorFunc(FromHeader), RequestTokenExtractorFunc(FromParams))
+	extractor := FromMultiple(RequestTokenExtractorFunc(FromHeader), RequestTokenExtractorFunc(FromParams), RequestTokenExtractorFunc(FromCookie))
 
 	referenceToken := getTestToken(defaultAudience, defaultIssuer, time.Now(), jose.HS256, defaultSecret)
 	headerTokenRequest, _ := http.NewRequest("", "http://localhost", nil)
@@ -69,8 +93,10 @@ func TestFromMultipleExtraction(t *testing.T) {
 	headerTokenRequest.Header.Add("Authorization", headerValue)
 	paramTokenRequest, _ := http.NewRequest("", "http://localhost?token="+referenceToken, nil)
 	brokenParamTokenRequest, _ := http.NewRequest("", "http://localhost?token=broken", nil)
+	cookieTokenRequest, _ := http.NewRequest("", "http://localhost", nil)
+	cookieTokenRequest.AddCookie(&http.Cookie{Name: "access_token", Value: referenceToken})
 
-	for _, r := range []*http.Request{headerTokenRequest, paramTokenRequest, brokenParamTokenRequest} {
+	for _, r := range []*http.Request{headerTokenRequest, paramTokenRequest, brokenParamTokenRequest, cookieTokenRequest} {
 		token, err := extractor.Extract(r)
 		if err != nil {
 			if r == brokenParamTokenRequest && err.Error() == "square/go-jose: compact JWS format must have three parts" {

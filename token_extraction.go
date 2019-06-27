@@ -76,3 +76,12 @@ func FromParams(r *http.Request) (*jwt.JSONWebToken, error) {
 	}
 	return jwt.ParseSigned(raw)
 }
+
+// FromCookie returns the JWT when passed in a Cookie as "access_token".
+func FromCookie(r *http.Request) (*jwt.JSONWebToken, error) {
+	raw, err := r.Cookie("access_token")
+	if err != nil {
+		return nil, ErrTokenNotFound
+	}
+	return jwt.ParseSigned(raw.Value)
+}
