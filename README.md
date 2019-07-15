@@ -14,6 +14,7 @@ Thanks goes to these wonderful people who contribute or maintain this repo ([emo
     <td align="center"><a href="http://blog.yageek.net"><img src="https://avatars2.githubusercontent.com/u/170917?v=4" width="100px;" alt="Yannick Heinrich"/><br /><sub><b>Yannick Heinrich</b></sub></a><br /><a href="#maintenance-yageek" title="Maintenance">🚧</a> <a href="https://github.com/auth0-community/auth0-go/commits?author=yageek" title="Code">💻</a></td>
     <td align="center"><a href="http://tuanhao.github.io"><img src="https://avatars2.githubusercontent.com/u/18233972?v=4" width="100px;" alt="Hao Chau"/><br /><sub><b>Hao Chau</b></sub></a><br /><a href="https://github.com/auth0-community/auth0-go/commits?author=Tuanhao" title="Code">💻</a></td>
     <td align="center"><a href="http://www.looplab.se"><img src="https://avatars0.githubusercontent.com/u/821518?v=4" width="100px;" alt="Max Ekman"/><br /><sub><b>Max Ekman</b></sub></a><br /><a href="https://github.com/auth0-community/auth0-go/commits?author=maxekman" title="Code">💻</a></td>
+    <td align="center"><a href="https://www.linkedin.com/in/tong-tony-jia-a248227b/"><img src="https://avatars1.githubusercontent.com/u/9013477?v=4" width="100px;" alt="Tony Jia"/><br /><sub><b>Tony Jia</b></sub></a><br /><a href="https://github.com/auth0-community/auth0-go/commits?author=ttjiaa" title="Code">💻</a></td>
   </tr>
 </table>
 
