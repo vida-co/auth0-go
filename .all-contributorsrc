@@ -24,6 +24,15 @@
         "maintenance",
         "code"
       ]
+    },
+    {
+      "login": "Tuanhao",
+      "name": "Hao Chau",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/18233972?v=4",
+      "profile": "http://tuanhao.github.io",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
