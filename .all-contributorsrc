@@ -14,6 +14,16 @@
         "maintenance",
         "review"
       ]
+    },
+    {
+      "login": "yageek",
+      "name": "Yannick Heinrich",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/170917?v=4",
+      "profile": "http://blog.yageek.net",
+      "contributions": [
+        "maintenance",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
