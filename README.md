@@ -11,8 +11,10 @@ Thanks goes to these wonderful people who contribute or maintain this repo ([emo
 <table>
   <tr>
     <td align="center"><a href="https://twitter.com/beardaway"><img src="https://avatars3.githubusercontent.com/u/11062800?v=4" width="100px;" alt="Conrad Sopala"/><br /><sub><b>Conrad Sopala</b></sub></a><br /><a href="#maintenance-beardaway" title="Maintenance">🚧</a> <a href="#review-beardaway" title="Reviewed Pull Requests">👀</a></td>
+    <td align="center"><a href="http://blog.yageek.net"><img src="https://avatars2.githubusercontent.com/u/170917?v=4" width="100px;" alt="Yannick Heinrich"/><br /><sub><b>Yannick Heinrich</b></sub></a><br /><a href="#maintenance-yageek" title="Maintenance">🚧</a> <a href="https://github.com/auth0-community/auth0-go/commits?author=yageek" title="Code">💻</a></td>
   </tr>
 </table>
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 # Go-Auth0
