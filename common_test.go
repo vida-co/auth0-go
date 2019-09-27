@@ -94,7 +94,7 @@ func getTestToken(audience []string, issuer string, expTime time.Time, alg jose.
 	return raw
 }
 
-func getTestTokenWithKid(audience []string, issuer string, expTime time.Time, alg jose.SignatureAlgorithm, key interface{}, kid string) string {
+func getTestTokenWithKid(audience []string, issuer string, expTime time.Time, alg jose.SignatureAlgorithm, key interface{}, kid string) *jwt.JSONWebToken {
 	signer, err := jose.NewSigner(jose.SigningKey{Algorithm: alg, Key: key}, (&jose.SignerOptions{ExtraHeaders: map[jose.HeaderKey]interface{}{"kid": kid}}).WithType("JWT"))
 	if err != nil {
 		panic(err)
@@ -107,14 +107,20 @@ func getTestTokenWithKid(audience []string, issuer string, expTime time.Time, al
 		Expiry:   jwt.NewNumericDate(expTime),
 	}
 
-	raw, err := jwt.Signed(signer).Claims(cl).CompactSerialize()
+	tokenStr, err := jwt.Signed(signer).Claims(cl).CompactSerialize()
 	if err != nil {
 		panic(err)
 	}
-	return raw
+
+	token, err := jwt.ParseSigned(tokenStr)
+	if err != nil {
+		panic(err)
+	}
+
+	return token
 }
 
-func genNewTestServer(genJWKS bool) (JWKClientOptions, string, string, error) {
+func genNewTestServer(genJWKS bool) (JWKClientOptions, *jwt.JSONWebToken, *jwt.JSONWebToken, error) {
 	// Generate JWKs
 	jsonWebKeyRS256 := genRSASSAJWK(jose.RS256, "keyRS256")
 	jsonWebKeyES384 := genECDSAJWK(jose.ES384, "keyES384")
@@ -129,6 +135,9 @@ func genNewTestServer(genJWKS bool) (JWKClientOptions, string, string, error) {
 		}
 	}
 	value, err := json.Marshal(&jwks)
+	if err != nil {
+		return JWKClientOptions{}, nil, nil, fmt.Errorf("error marshalling jwks to json: %v", err)
+	}
 
 	// Generate Tokens
 	tokenRS256 := getTestTokenWithKid(defaultAudience, defaultIssuer, time.Now().Add(24*time.Hour), jose.RS256, jsonWebKeyRS256, "keyRS256")
