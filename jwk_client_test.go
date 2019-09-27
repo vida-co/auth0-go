@@ -3,6 +3,7 @@ package auth0
 import (
 	"errors"
 	"fmt"
+	"gopkg.in/square/go-jose.v2/jwt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -60,12 +61,8 @@ func TestJWKDownloadKeySuccess(t *testing.T) {
 		t.FailNow()
 	}
 
-	for _, token := range []string{tokenRS256, tokenES384} {
-		req, _ := http.NewRequest("", "http://localhost", nil)
-		headerValue := fmt.Sprintf("Bearer %s", token)
-		req.Header.Add("Authorization", headerValue)
-
-		_, err = client.GetSecret(req)
+	for _, token := range []*jwt.JSONWebToken{tokenRS256, tokenES384} {
+		_, err = client.GetSecret(token)
 		if err != nil {
 			t.Errorf("Should be considered as valid, but failed with error: " + err.Error())
 		}
@@ -94,11 +91,7 @@ func TestJWKDownloadKeyNoKeys(t *testing.T) {
 	opts, _, tokenES384, err := genNewTestServer(false)
 	client := NewJWKClient(opts, nil)
 
-	req, _ := http.NewRequest("", "http://localhost", nil)
-	headerValue := fmt.Sprintf("Bearer %s", tokenES384)
-	req.Header.Add("Authorization", headerValue)
-
-	_, err = client.GetSecret(req)
+	_, err = client.GetSecret(tokenES384)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "no Keys has been found")
 }
@@ -113,11 +106,7 @@ func TestJWKDownloadKeyNotFound(t *testing.T) {
 
 	invalidToken := getTestTokenWithKid(defaultAudience, defaultIssuer, time.Now().Add(24*time.Hour), jose.ES384, genECDSAJWK(jose.ES384, "keyES385"), "keyES385")
 
-	req, _ := http.NewRequest("", "http://localhost", nil)
-	headerValue := fmt.Sprintf("Bearer %s", invalidToken)
-	req.Header.Add("Authorization", headerValue)
-
-	_, err = client.GetSecret(req)
+	_, err = client.GetSecret(invalidToken)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "no Keys has been found")
 }
@@ -275,40 +264,10 @@ func TestJWKClient_customClient(t *testing.T) {
 	}
 }
 
-func testGetSecret(t *testing.T, client *JWKClient, tokenRS256 string) {
-	tests := []struct {
-		name        string
-		token       string
-		expectError bool
-	}{
-		{
-			name:        "pass",
-			token:       tokenRS256,
-			expectError: false,
-		},
-		{
-			name:        "fail - invalid token",
-			token:       "invalid.token",
-			expectError: true,
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			req, _ := http.NewRequest("", "http://localhost", nil)
-			headerValue := fmt.Sprintf("Bearer %s", test.token)
-			req.Header.Add("Authorization", headerValue)
-
-			key, err := client.GetSecret(req)
-			if test.expectError {
-				assert.Error(t, err)
-				assert.Nil(t, key)
-			} else {
-				assert.NoError(t, err)
-				assert.NotNil(t, key)
-			}
-		})
-	}
+func testGetSecret(t *testing.T, client *JWKClient, token *jwt.JSONWebToken) {
+	key, err := client.GetSecret(token)
+	assert.NoError(t, err)
+	assert.NotNil(t, key)
 }
 
 type mockRoundTripper struct {

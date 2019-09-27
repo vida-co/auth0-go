@@ -22,7 +22,7 @@ func genTestConfiguration(configuration Configuration, token string) (*JWTValida
 	return validator, req
 }
 
-func invalidProvider(req *http.Request) (interface{}, error) {
+func invalidProvider(token *jwt.JSONWebToken) (interface{}, error) {
 	return nil, errors.New("invalid secret provider")
 }
 
@@ -258,7 +258,7 @@ func TestValidateRequestAndClaims(t *testing.T) {
 
 				// claims should be unmarshalled successfully
 				claims := map[string]interface{}{}
-				err = validator.Claims(req, jwt, &claims)
+				err = validator.Claims(jwt, &claims)
 				if err != nil {
 					t.Errorf("Claims unmarshall should not have failed with error, but got: " + err.Error())
 				}
@@ -531,7 +531,7 @@ func TestValidateRequestAndClaimsWithLeeway(t *testing.T) {
 
 				// claims should be unmarshalled successfully
 				claims := map[string]interface{}{}
-				err = validator.Claims(req, jwt, &claims)
+				err = validator.Claims(jwt, &claims)
 				if err != nil {
 					t.Errorf("Claims unmarshall should not have failed with error, but got: " + err.Error())
 				}

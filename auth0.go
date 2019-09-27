@@ -12,21 +12,21 @@ import (
 // SecretProvider will provide everything
 // needed retrieve the secret.
 type SecretProvider interface {
-	GetSecret(r *http.Request) (interface{}, error)
+	GetSecret(token *jwt.JSONWebToken) (interface{}, error)
 }
 
 // SecretProviderFunc simple wrappers to provide
 // secret with functions.
-type SecretProviderFunc func(*http.Request) (interface{}, error)
+type SecretProviderFunc func(token *jwt.JSONWebToken) (interface{}, error)
 
 // GetSecret implements the SecretProvider interface.
-func (f SecretProviderFunc) GetSecret(r *http.Request) (interface{}, error) {
-	return f(r)
+func (f SecretProviderFunc) GetSecret(token *jwt.JSONWebToken) (interface{}, error) {
+	return f(token)
 }
 
 // NewKeyProvider provide a simple passphrase key provider.
 func NewKeyProvider(key interface{}) SecretProvider {
-	return SecretProviderFunc(func(_ *http.Request) (interface{}, error) {
+	return SecretProviderFunc(func(_ *jwt.JSONWebToken) (interface{}, error) {
 		return key, nil
 	})
 }
@@ -98,36 +98,52 @@ func (v *JWTValidator) validateRequestWithLeeway(r *http.Request, leeway time.Du
 		return nil, err
 	}
 
+	if err := v.validateTokenWithLeeway(token, leeway); err != nil {
+		return nil, err
+	}
+
+	return token, nil
+}
+
+func (v *JWTValidator) ValidateToken(token *jwt.JSONWebToken) error {
+	return v.validateTokenWithLeeway(token, jwt.DefaultLeeway)
+}
+
+func (v *JWTValidator) ValidateTokenWithLeeway(token *jwt.JSONWebToken, leeway time.Duration) error {
+	return v.validateTokenWithLeeway(token, leeway)
+}
+
+func (v *JWTValidator) validateTokenWithLeeway(token *jwt.JSONWebToken, leeway time.Duration) error {
 	if len(token.Headers) < 1 {
-		return nil, ErrNoJWTHeaders
+		return ErrNoJWTHeaders
 	}
 
 	// trust secret provider when sig alg not configured and skip check
 	if v.config.signIn != "" {
 		header := token.Headers[0]
 		if header.Algorithm != string(v.config.signIn) {
-			return nil, ErrInvalidAlgorithm
+			return ErrInvalidAlgorithm
 		}
 	}
 
 	claims := jwt.Claims{}
-	key, err := v.config.secretProvider.GetSecret(r)
+	key, err := v.config.secretProvider.GetSecret(token)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err = token.Claims(key, &claims); err != nil {
-		return nil, err
+		return err
 	}
 
 	expected := v.config.expectedClaims.WithTime(time.Now())
 	err = claims.ValidateWithLeeway(expected, leeway)
-	return token, err
+	return err
 }
 
 // Claims unmarshall the claims of the provided token
-func (v *JWTValidator) Claims(r *http.Request, token *jwt.JSONWebToken, values ...interface{}) error {
-	key, err := v.config.secretProvider.GetSecret(r)
+func (v *JWTValidator) Claims(token *jwt.JSONWebToken, values ...interface{}) error {
+	key, err := v.config.secretProvider.GetSecret(token)
 	if err != nil {
 		return err
 	}

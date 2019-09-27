@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"gopkg.in/square/go-jose.v2/jwt"
 	"net/http"
 	"strings"
 	"sync"
@@ -112,12 +113,7 @@ func (j *JWKClient) downloadKeys() ([]jose.JSONWebKey, error) {
 }
 
 // GetSecret implements the GetSecret method of the SecretProvider interface.
-func (j *JWKClient) GetSecret(r *http.Request) (interface{}, error) {
-	token, err := j.extractor.Extract(r)
-	if err != nil {
-		return nil, err
-	}
-
+func (j *JWKClient) GetSecret(token *jwt.JSONWebToken) (interface{}, error) {
 	if len(token.Headers) < 1 {
 		return nil, ErrNoJWTHeaders
 	}
