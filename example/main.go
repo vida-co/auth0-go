@@ -102,7 +102,7 @@ func Auth0Groups(wantedGroups ...string) gin.HandlerFunc {
 		}
 
 		claims := map[string]interface{}{}
-		err = validator.Claims(c.Request, tok, &claims)
+		err = validator.Claims(tok, &claims)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid claims"})
 			c.Abort()
