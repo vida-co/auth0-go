@@ -94,7 +94,8 @@ func (j *JWKClient) downloadKeys() ([]jose.JSONWebKey, error) {
 	}
 	defer resp.Body.Close()
 
-	if contentH := resp.Header.Get("Content-Type"); !strings.HasPrefix(contentH, "application/json") {
+	if contentH := resp.Header.Get("Content-Type"); !strings.HasPrefix(contentH, "application/json") &&
+		!strings.HasPrefix(contentH, "application/jwk-set+json") {
 		return []jose.JSONWebKey{}, ErrInvalidContentType
 	}
 
