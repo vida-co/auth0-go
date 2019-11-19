@@ -1,4 +1,4 @@
-module github.com/auth0-community/go-auth0
+module github.com/vida-co/go-auth0
 
 require (
 	github.com/stretchr/testify v1.4.0
